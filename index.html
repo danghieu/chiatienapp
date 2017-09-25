@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="canonical" href="https://weather-pwa-sample.firebaseapp.com/final/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chia tien</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>  
+  
+  <link rel="stylesheet" type="text/css" href="styles/inline.css">
+
+  <!-- TODO add manifest here -->
+  <!-- Add to home screen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Weather PWA">
+  <meta name="msapplication-TileColor" content="#2F3BA2">
+</head>
+<body>
+
+  <header class="header">
+    <h1 class="header__title">Chia Tien</h1>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <form id='initEventForm' style="display: none;">
+          <div class="form-group">
+            <label for="howmanyPeople">How many people:</label>
+            <input type="number" class="form-control" id="howmanyPeople" aria-describedby="emailHelp" placeholder="4">
+          </div>
+        <button class="btn btn-next btn-primary" id="btnHowmanyPeople">Next</button>
+      </form>
+      <div id="expensesWrap" style="display: none;">
+        <div class="expenseElement">
+          <button class="btn btnExpenseExpand" type="button" data-toggle="collapse" data-target="#collapseExpenseAddNew" aria-expanded="false" aria-controls="collapseExpenseAddNew">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+          </button>
+          <div class="collapse" id="collapseExpenseAddNew">
+            <form id='expensesNewForm'>
+          </form>
+          </div>
+        </div>
+        <div id="expenseElements">
+        </div>
+        
+        
+      </div> <!-- expensesWrap -->
+      <div id="resultWrap" style="display: none;">
+        <h2>Result</h2>
+        <table id="resultTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </main>
+ <!--  <div class="loader">
+    <svg viewBox="0 0 32 32" width="32" height="32">
+      <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+    </svg>
+  </div> -->
+
+  <!-- Uncomment the line below when ready to test with fake data -->
+  <script src="scripts/app.js" async></script>
+</body>
+</html>
