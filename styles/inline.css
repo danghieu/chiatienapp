@@ -194,7 +194,7 @@ body {
 .expense__value {
   margin-left: 20px;
 }
-.btnExpenseExpand {
+.btnExpenseExpand, .btnExpenseDelete  {
   background-color: transparent;
 }
 .expenseElement{

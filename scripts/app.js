@@ -44,11 +44,11 @@
           app.showNamesForm();
         }
       }else {
-        app.showExpenses();
+        app.updateExpenses();
       }
       
     },
-    showExpenses: function(){
+    updateExpenses: function(){
       app.expensesWrap.style.display = "block";
       app.resultWrap.style.display = "block";
       app.showExpenseElements();
@@ -136,6 +136,9 @@
                                 <button class="btn btnExpenseExpand" type="button" data-toggle="collapse" data-target="#collapseExpense'+i+'" aria-expanded="false" aria-controls="collapseExpense'+i+'">\
                                   <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>\
                                 </button>\
+                                <button class="btn btnExpenseDelete" data-id="'+i+'" data-confirm="Are you sure to delete this item?" type="button" >\
+                                  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
+                                </button>\
                               </div>\
                               <div class="collapse" id="collapseExpense'+i+'">\
                                 <div class="card card-body">\
@@ -145,6 +148,25 @@
                             </div>'
       }
       app.expenseElements.innerHTML= expenseElements;
+      app.handleBtnDeleteExpenseEvent();
+    },
+    handleBtnDeleteExpenseEvent: function() {
+      var deletebtns = document.querySelectorAll('.btnExpenseDelete');
+      for (var i = 0; i < deletebtns.length; i++) {
+        deletebtns[i].addEventListener('click', function(e) {
+          e.preventDefault();
+          var choice = confirm(this.getAttribute('data-confirm'));
+
+          if (choice) {
+            var expenseId = this.getAttribute('data-id');
+            delete app.eventData.expenses[expenseId];
+            console.log(app.eventData.expenses);
+            app.eventData.expenses = app.eventData.expenses.filter(function(){return true;});
+            app.saveEventData();
+            app.updateExpenses();
+          }
+        });
+      }
     },
     handleBtnAddNewExpenseEvent: function() {
       document.getElementById('btnAddNewExpense').addEventListener('click', function(e) {
@@ -180,7 +202,7 @@
         }
         app.saveEventData();
         app.initEventForm.innerHTML = '';
-        app.showExpenses();
+        app.updateExpenses();
       });
     },
     showNamesForm: function(){
