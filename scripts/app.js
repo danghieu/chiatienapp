@@ -9,7 +9,8 @@
       app.expensesNewForm = document.getElementById('expensesNewForm');
       app.resultTable = document.getElementById('resultTable');
       app.resultWrap = document.getElementById('resultWrap');
-      app.tripName_title = document.getElementById('tripName_title');  
+      app.tripName_title = document.getElementById('tripName_title');
+      app.colors = ['#009688', '#eaa032', '#9d419e', '#945d65', '#935d94'];
       app.eventData = {};
       app.result = {};
       app.expenseTypes = ['Food', 'Service'];
@@ -189,7 +190,7 @@
       var expenseElements = '';
       for (var i=0; i < app.eventData.expenses.length; i ++) {
         expenseElements += '<div id="expense'+i+'" class="expenseElement">\
-                              <div class="expense__header">\
+                              <div class="expense__header" style="background-color: '+app.colors[app.eventData.expenses[i].whopaid%app.colors.length]+'">\
                                 <div class="expense expense__whopaid">\
                                 <div class="expense__title">who paid:</div>\
                                   <div class="expense__value">'+app.getPersonbyID(app.eventData.expenses[i].whopaid).name+'</div>\
