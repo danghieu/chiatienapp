@@ -11,6 +11,7 @@
       app.resultWrap = document.getElementById('resultWrap');
       app.tripName_title = document.getElementById('tripName_title');  
       app.eventData = {};
+      app.result = {};
       app.expenseTypes = ['Food', 'Service'];
       app.getEventData();
       if (!app.eventData) {
@@ -43,7 +44,7 @@
                     </ul>';
       $('#messages').html(messageHtml);
       setTimeout(function() {
-         $('#messages').fadeOut();
+         $('#messages').html('');
       }, 5000 );
     },
     updateDashboard: function(){
@@ -66,25 +67,53 @@
                             <label for="tripName">Trip Name:</label>\
                             <input type="text" value="'+app.eventData.tripName+'" class="form-control" id="tripName">\
                           </div>';
-      for (var i=0; i<app.eventData.people.names.length; i++) {
-        eventDataForm +=  '<div class="form-group col-md-12">\
-                            <label for="person">Person #'+i+':</label>\
-                            <input type="text" value="'+app.eventData.people.names[i]+'" class="form-control" name="person[]">'
-        if(i==app.eventData.people.names.length-1) {
+      // for (var i=0; i<app.eventData.people.names.length; i++) {
+      app.eventData.people.names.forEach(function(person, index) {
+          eventDataForm +=  '<div class="form-group col-md-12">\
+                              <label for="person">Person #'+index+':</label>\
+                              <input type="text" value="'+person.name+'" class="form-control" data-index="'+index+'" data-id="'+person.id+'" name="person[]">';
+          if(app.eventData.people.names.length>1) {
+            eventDataForm += '<button class="btn btnNameDelete" data-index="'+index+'" data-id="'+person.id+'" data-confirm="Are you sure to delete this item?" type="button" >\
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
+                                  </button>';
+          }
+        if(index==app.eventData.people.names.length-1) {
           eventDataForm += '<button class="btn btn-success btnAddMoreName" type="button" data-toggle="collapse"\
            data-target="#collapseAddMoreName" aria-expanded="false" aria-controls="collapseAddMoreName">Add Person</button>';
         }
         eventDataForm +=  '</div>';
-      }
+      }); 
+      var id = app.eventData.people.names.slice(-1)[0].id +1;
       eventDataForm += '<div class="collapse form-group col-md-12" id="collapseAddMoreName">\
-            <label for="person">Person #'+i+':</label>\
-              <input type="text" value="" class="form-control" name="person[]">\
+            <label for="person">Person #'+app.eventData.people.names.length+':</label>\
+              <input type="text" value="" class="form-control" data-id="'+id+'" name="person[]">\
             </div>';
       eventDataForm +=  '<button class="btn btn-next btn-primary" id="btnUpdateEvent">Update</button>\
                         </div>';
       app.initEventForm.innerHTML = eventDataForm;
       app.handleBtnUpdateEvent();
-
+      app.handleBtnNameDelete();
+    },
+    handleBtnNameDelete: function(){
+      var deletebtns = document.querySelectorAll('.btnNameDelete');
+      for (var i = 0; i < deletebtns.length; i++) {
+        deletebtns[i].addEventListener('click', function(e) {
+          e.preventDefault();
+          var choice = confirm(this.getAttribute('data-confirm'));
+          if (choice) {
+            var nameId = this.getAttribute('data-id');
+            var nameIndex = this.getAttribute('data-index');
+            if (typeof app.result.people[nameId] != 'undefined' && app.result.people[nameId] ) {
+              app.showResultMessage('error', 'This person paid some expenses. Please remove these expense before remove this person');
+              return;
+            }
+            delete app.eventData.people.names[nameIndex];
+            app.eventData.people.names = app.eventData.people.names.filter(function(){return true;});
+            app.saveEventData();
+            app.updateDashboard();
+          }
+        });
+      }
     },
     handleBtnUpdateEvent: function(){
       document.getElementById('btnUpdateEvent').addEventListener('click', function(e) {
@@ -97,34 +126,34 @@
     },
     updateResultTable: function(){
       var tbody = app.resultTable.getElementsByTagName('tbody')[0];
-      var result = {
+      app.result = {
         total:0,
         eachPerson:0,
         people:[],
       };
       for(var i =0; i <app.eventData.people.numOfPeople; i++) {
-        result.people[i] =0;
+        app.result.people[i] =0;
       }
       for(var i=0; i < app.eventData.expenses.length; i++) {
-        result.total += app.eventData.expenses[i].paid;
+        app.result.total += app.eventData.expenses[i].paid;
         var whopaid = app.eventData.expenses[i].whopaid;
-        result.people[whopaid] += app.eventData.expenses[i].paid;
+        app.result.people[whopaid] += app.eventData.expenses[i].paid;
         
       }
-      result.eachPerson = Math.floor(result.total/app.eventData.people.numOfPeople);
+      app.result.eachPerson = Math.floor(app.result.total/app.eventData.people.numOfPeople);
       var cell = '<tr>\
                     <td>Total</td>\
-                    <td><span>'+numberWithCommas(result.total)+'</span></td>\
+                    <td><span>'+numberWithCommas(app.result.total)+'</span></td>\
                   </tr>\
                   <tr>\
                     <td>Each person</td>\
-                    <td><span>'+numberWithCommas(result.eachPerson)+'</span></td>\
+                    <td><span>'+numberWithCommas(app.result.eachPerson)+'</span></td>\
                   </tr>';
       for(var i=0; i < app.eventData.people.names.length; i++) {
-        var paid = result.people[i] ? result.people[i] : 0;
-        var rest = result.eachPerson - paid;
+        var paid = app.result.people[app.eventData.people.names[i].id] ? app.result.people[app.eventData.people.names[i].id] : 0;
+        var rest = app.result.eachPerson - paid;
         cell +=   '<tr>\
-                    <td>'+app.eventData.people.names[i]+'</td>\
+                    <td>'+app.eventData.people.names[i].name+'</td>\
                     <td>Paid: '+numberWithCommas(paid)+'</td>\
                     <td>Rest: '+numberWithCommas(rest)+'</td>\
                   </tr>';
@@ -136,7 +165,7 @@
                 <label for="whopaid">Who paid:</label>\
                 <select name="expense[whopaid]">';
       for (var i=0; i < app.eventData.people.names.length; i ++) {
-        expenseForm += '<option value="'+i+'">'+app.eventData.people.names[i]+'</option>';
+        expenseForm += '<option value="'+app.eventData.people.names[i].id+'">'+app.eventData.people.names[i].name+'</option>';
       }
       expenseForm += '</select>\
               </div>\
@@ -150,7 +179,7 @@
               </div>\
               <div class="form-group form-group-expense">\
                 <label for="type">Paid:</label>\
-                <input type="number" name="expense[paid]">\
+                <input type="text" name="expense[paid]">\
               </div>\
             <button class="btn btn-next btn-success" id="btnAddNewExpense">Add</button>';      
       app.expensesNewForm.innerHTML= expenseForm;
@@ -163,7 +192,7 @@
                               <div class="expense__header">\
                                 <div class="expense expense__whopaid">\
                                 <div class="expense__title">who paid:</div>\
-                                  <div class="expense__value">'+app.eventData.people.names[app.eventData.expenses[i].whopaid]+'</div>\
+                                  <div class="expense__value">'+app.getPersonbyID(app.eventData.expenses[i].whopaid).name+'</div>\
                                 </div>\
                                 <div class="expense expense__type">\
                                   <div class="expense__title">Type:</div>\
@@ -200,7 +229,6 @@
           if (choice) {
             var expenseId = this.getAttribute('data-id');
             delete app.eventData.expenses[expenseId];
-            console.log(app.eventData.expenses);
             app.eventData.expenses = app.eventData.expenses.filter(function(){return true;});
             app.saveEventData();
             app.updateDashboard();
@@ -214,6 +242,10 @@
         var expenseWhoPaid = document.getElementsByName("expense[whopaid]")[0].value;
         var expenseType = document.getElementsByName("expense[type]")[0].value;
         var expensePaid = document.getElementsByName("expense[paid]")[0].value;
+        if (!parseInt(expensePaid) || parseInt(expensePaid) <= 0) {
+          app.showResultMessage('error', 'Invalid');
+          return;
+        }
         var expense = {
           whopaid: parseInt(expenseWhoPaid),
           type: expenseType,
@@ -231,6 +263,19 @@
     getEventData: function() {
       app.eventData = localStorage.eventData ? JSON.parse(localStorage.eventData) : null;
     },
+    showNamesForm: function(){
+      var namesForm = '';
+      for (var i=0; i < app.eventData.people.numOfPeople; i ++) {
+        namesForm += '<div class="form-group">';
+        namesForm +=   '<label for="person">Person #'+i+':</label>';
+        namesForm +=   '<input type="text" class="form-control" data-id='+i+' name="person[]" placeholder="person name '+i+'">';
+        namesForm +=  '</div>';
+      }
+      namesForm +=  '<button class="btn btn-next btn-primary" id="btnNames">Next</button>';
+      
+      app.initEventForm.innerHTML= namesForm;
+      app.btnNamesHandleEvent();
+    },
     btnNamesHandleEvent: function() {
       document.getElementById('btnNames').addEventListener('click', function(e) {
         e.preventDefault();
@@ -242,29 +287,24 @@
     updatePeople: function(){
       var inputs = document.querySelectorAll('input[name="person[]"');
       for(var i=0; i<inputs.length; i++) {
-        var value = inputs[i].value.trim();
-        if (!value) continue;
-        app.eventData.people.names[i] = value;
+        var name = inputs[i].value.trim();
+        var id = parseInt(inputs[i].getAttribute('data-id'));
+        var index = parseInt(inputs[i].getAttribute('data-index'));
+        if (!name) continue;
+        var value = {id: id, name: name}
+        if (index>=0) {
+          app.eventData.people.names[index] = value;
+        } else {
+          app.eventData.people.names.push(value);
+        }
       }
+      app.eventData.people.numOfPeople = app.eventData.people.names.length;
       app.saveEventData();
-    },
-    showNamesForm: function(){
-      var namesForm = '';
-      for (var i=0; i < app.eventData.people.numOfPeople; i ++) {
-        namesForm += '<div class="form-group">';
-        namesForm +=   '<label for="person">Person #'+i+':</label>';
-        namesForm +=   '<input type="text" class="form-control" name="person[]" placeholder="person name '+i+'">';
-        namesForm +=  '</div>';
-      }
-      namesForm +=  '<button class="btn btn-next btn-primary" id="btnNames">Next</button>';
-      
-      app.initEventForm.innerHTML= namesForm;
-      app.btnNamesHandleEvent();
     },
     showHowManyPeopleForm: function(){
       var howManyPeopleForm = '<div class="form-group">\
           <label for="howmanyPeople">How many people:</label>\
-          <input type="number" pattern="\d*" class="form-control" id="howmanyPeople" placeholder="4">\
+          <input type="text" class="form-control" id="howmanyPeople" placeholder="4">\
         </div>\
         <button class="btn btn-next btn-primary" id="btnHowmanyPeople">Next</button>';
       app.initEventForm.innerHTML= howManyPeopleForm;
@@ -274,6 +314,10 @@
       document.getElementById('btnHowmanyPeople').addEventListener('click', function(e) {
         e.preventDefault();
         var numOfPeople = document.getElementById('howmanyPeople');
+        if(!parseInt(numOfPeople.value) || parseInt(numOfPeople.value) <=0) {
+          app.showResultMessage('error', 'Invalid');
+          return;
+        }
         app.eventData.people.numOfPeople = parseInt(numOfPeople.value);
         app.saveEventData();
         app.showNamesForm();
@@ -303,6 +347,13 @@
     },
     setTripNameTitle: function() {
       app.tripName_title.innerHTML = app.eventData.tripName;
+    },
+    getPersonbyID: function(id){
+      for(var i =0; i < app.eventData.people.names.length; i++) {
+        if (app.eventData.people.names[i].id == id) {
+          return app.eventData.people.names[i];
+        }
+      }
     }
   };
 
