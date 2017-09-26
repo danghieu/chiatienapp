@@ -25,25 +25,38 @@
 
   <header class="header">
     <h1 class="header__title">Chia Tien</h1>
+    <h2 class="header__title" id="tripName_title"></h2>
   </header>
 
   <main class="main">
     <div class="container">
-      <form id='initEventForm' style="display: none;">
+      <form id='initEventForm'>
+      <button class="btn btn-primary btnEventDataExpand" type="button" data-toggle="collapse" data-target="#collapseEventdata" aria-expanded="false" aria-controls="collapseEventdata">
+          Trip Information 
+          <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+        </button>
+        <div class="collapse collapseEventdata" id="collapseEventdata">
           <div class="form-group">
-            <label for="howmanyPeople">How many people:</label>
-            <input type="number" class="form-control" id="howmanyPeople" aria-describedby="emailHelp" placeholder="4">
+            <label for="tripName">Trip Name:</label>
+            <input type="text" value="hieu" class="form-control" name="tripName">
           </div>
-        <button class="btn btn-next btn-primary" id="btnHowmanyPeople">Next</button>
+          <div class="form-group">
+            <label for="person">Person #:</label>
+            <input type="text" value="hieu" class="form-control" name="person[]">
+            <button class="btn btn-success" id="btnAddMoreName">Add Person</button>
+          </div>
+
+          <button class="btn btn-next btn-primary" id="btnUpdateEvent">Update</button>
+        </div>
       </form>
       <div id="expensesWrap" style="display: none;">
         <div class="expenseElement">
-          <button class="btn btnExpenseExpand" type="button" data-toggle="collapse" data-target="#collapseExpenseAddNew" aria-expanded="false" aria-controls="collapseExpenseAddNew">
+          <button class="btn btn-success btnNewExpenseExpand" type="button" data-toggle="collapse" data-target="#collapseExpenseAddNew" aria-expanded="false" aria-controls="collapseExpenseAddNew">
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
           </button>
           <div class="collapse" id="collapseExpenseAddNew">
-            <form id='expensesNewForm'>
-          </form>
+            <form class="collapseNewForm" id='expensesNewForm'>
+            </form>
           </div>
         </div>
         <div id="expenseElements">

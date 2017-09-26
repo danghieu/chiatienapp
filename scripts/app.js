@@ -1,18 +1,3 @@
-// Copyright 2016 Google Inc.
-// 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// 
-//      http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-
 (function() {
   'use strict';
 
@@ -24,11 +9,13 @@
       app.expensesNewForm = document.getElementById('expensesNewForm');
       app.resultTable = document.getElementById('resultTable');
       app.resultWrap = document.getElementById('resultWrap');
+      app.tripName_title = document.getElementById('tripName_title');  
       app.eventData = {};
       app.expenseTypes = ['Food', 'Service'];
       app.getEventData();
       if (!app.eventData) {
         app.eventData = {
+          tripName: null,
           people : {
             numOfPeople: 0,
             names: []
@@ -37,22 +24,56 @@
           ]
         };
       }
-      if(app.eventData.people.names.length <= 0) {
-        app.initEventForm.style.display = "block";
-        if(app.eventData.people.numOfPeople > 0) {
-          app.showNamesForm();
-        }
-      }else {
-        app.updateExpenses();
+      console.log(app.eventData);
+      if (!app.eventData.tripName) {
+        app.showTripNameForm();
+      } else if(app.eventData.people.numOfPeople < 0) {
+        app.showHowManyPeopleForm();
+      } else if(app.eventData.people.names.length <= 0) {
+        app.showNamesForm();
+      } else {
+        app.updateDashboard();
       }
-      
+      if(app.eventData.tripName) {
+        app.setTripNameTitle();
+      }
     },
-    updateExpenses: function(){
+    updateDashboard: function(){
+      app.showEventDataForm();
       app.expensesWrap.style.display = "block";
       app.resultWrap.style.display = "block";
       app.showExpenseElements();
       app.showAddExpenseForm();
       app.updateResultTable();
+    },
+    showEventDataForm: function(){
+      var eventDataForm = '<button class="btn btn-primary btnEventDataExpand" type="button" data-toggle="collapse"\
+          data-target="#collapseEventdata" aria-expanded="false" aria-controls="collapseEventdata">\
+                          Trip Information\
+                          <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>\
+                        </button>\
+                        <div class="collapse collapseEventdata" id="collapseEventdata">\
+                          <div class="form-group">\
+                            <label for="tripName">Trip Name:</label>\
+                            <input type="text" value="'+app.eventData.tripName+'" class="form-control" name="tripName">\
+                          </div>';
+      for (var i=0; i<app.eventData.people.names.length; i++) {
+        eventDataForm +=  '<div class="form-group col-md-12">\
+                            <label for="person">Person #'+i+':</label>\
+                            <input type="text" value="'+app.eventData.people.names[i]+'" class="form-control" name="person[]">'
+        if(i==app.eventData.people.names.length-1) {
+          eventDataForm += '<button class="btn btn-success btnAddMoreName" type="button" data-toggle="collapse"\
+           data-target="#collapseAddMoreName" aria-expanded="false" aria-controls="collapseAddMoreName">Add Person</button>';
+        }
+        eventDataForm +=  '</div>';
+      }
+      eventDataForm += '<div class="collapse form-group col-md-12" id="collapseAddMoreName">\
+            <label for="person">Person #'+i+':</label>\
+              <input type="text" value="" class="form-control" name="person[]">\
+            </div>';
+      eventDataForm +=  '<button class="btn btn-next btn-primary" id="btnUpdateEvent">Update</button>\
+                        </div>';
+      app.initEventForm.innerHTML = eventDataForm;
     },
     updateResultTable: function(){
       var tbody = app.resultTable.getElementsByTagName('tbody')[0];
@@ -111,7 +132,7 @@
                 <label for="type">Paid:</label>\
                 <input type="number" name="expense[paid]">\
               </div>\
-            <button class="btn btn-next btn-primary" id="btnAddNewExpense">Add</button>';      
+            <button class="btn btn-next btn-success" id="btnAddNewExpense">Add</button>';      
       app.expensesNewForm.innerHTML= expenseForm;
       app.handleBtnAddNewExpenseEvent();
     },
@@ -162,7 +183,7 @@
             console.log(app.eventData.expenses);
             app.eventData.expenses = app.eventData.expenses.filter(function(){return true;});
             app.saveEventData();
-            app.updateExpenses();
+            app.updateDashboard();
           }
         });
       }
@@ -201,7 +222,7 @@
         }
         app.saveEventData();
         app.initEventForm.innerHTML = '';
-        app.updateExpenses();
+        app.updateDashboard();
       });
     },
     showNamesForm: function(){
@@ -216,17 +237,48 @@
       
       app.initEventForm.innerHTML= namesForm;
       app.btnNamesHandleEvent();
+    },
+    showHowManyPeopleForm: function(){
+      var howManyPeopleForm = '<div class="form-group">\
+          <label for="howmanyPeople">How many people:</label>\
+          <input type="number" pattern="\d*" class="form-control" id="howmanyPeople" placeholder="4">\
+        </div>\
+        <button class="btn btn-next btn-primary" id="btnHowmanyPeople">Next</button>';
+      app.initEventForm.innerHTML= howManyPeopleForm;
+      app.handleNtnHowmanyPeopleEvent();
+    },
+    handleNtnHowmanyPeopleEvent: function(){
+      document.getElementById('btnHowmanyPeople').addEventListener('click', function(e) {
+        e.preventDefault();
+        var numOfPeople = document.getElementById('howmanyPeople');
+        app.eventData.people.numOfPeople = parseInt(numOfPeople.value);
+        app.saveEventData();
+        app.showNamesForm();
+      });
+    },
+    showTripNameForm: function(){
+      var tripNameForm = '<div class="form-group">\
+          <label for="tripName">Trip Name:</label>\
+          <input type="text" class="form-control" id="tripName" placeholder="">\
+        </div>\
+        <button class="btn btn-next btn-primary" id="btnTripName">Next</button>';
+      app.initEventForm.innerHTML= tripNameForm;
+      app.handlebtnTripNameEvent();
+    },
+    handlebtnTripNameEvent: function(){
+      document.getElementById('btnTripName').addEventListener('click', function(e) {
+        e.preventDefault();
+        var tripName = document.getElementById('tripName');
+        app.eventData.tripName = tripName.value;
+        app.setTripNameTitle();
+        app.saveEventData();
+        app.showHowManyPeopleForm();
+      });
+    },
+    setTripNameTitle: function() {
+      app.tripName_title.innerHTML = app.eventData.tripName;
     }
-
   };
-
-  document.getElementById('btnHowmanyPeople').addEventListener('click', function(e) {
-    e.preventDefault();
-    var numOfPeople = document.getElementById('howmanyPeople');
-    app.eventData.people.numOfPeople = parseInt(numOfPeople.value);
-    app.saveEventData();
-    app.showNamesForm();
-  });
 
   function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
