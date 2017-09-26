@@ -37,7 +37,6 @@
           ]
         };
       }
-
       if(app.eventData.people.names.length <= 0) {
         app.initEventForm.style.display = "block";
         if(app.eventData.people.numOfPeople > 0) {
