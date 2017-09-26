@@ -24,7 +24,6 @@
           ]
         };
       }
-      console.log(app.eventData);
       if (!app.eventData.tripName) {
         app.showTripNameForm();
       } else if(app.eventData.people.numOfPeople < 0) {
@@ -38,7 +37,17 @@
         app.setTripNameTitle();
       }
     },
+    showResultMessage: function(type, messages){
+      var messageHtml = '<ul>\
+                      <li><span class="message '+type+'">'+messages+'</span></li>\
+                    </ul>';
+      $('#messages').html(messageHtml);
+      setTimeout(function() {
+         $('#messages').fadeOut();
+      }, 5000 );
+    },
     updateDashboard: function(){
+      app.setTripNameTitle();
       app.showEventDataForm();
       app.expensesWrap.style.display = "block";
       app.resultWrap.style.display = "block";
@@ -55,7 +64,7 @@
                         <div class="collapse collapseEventdata" id="collapseEventdata">\
                           <div class="form-group">\
                             <label for="tripName">Trip Name:</label>\
-                            <input type="text" value="'+app.eventData.tripName+'" class="form-control" name="tripName">\
+                            <input type="text" value="'+app.eventData.tripName+'" class="form-control" id="tripName">\
                           </div>';
       for (var i=0; i<app.eventData.people.names.length; i++) {
         eventDataForm +=  '<div class="form-group col-md-12">\
@@ -74,6 +83,17 @@
       eventDataForm +=  '<button class="btn btn-next btn-primary" id="btnUpdateEvent">Update</button>\
                         </div>';
       app.initEventForm.innerHTML = eventDataForm;
+      app.handleBtnUpdateEvent();
+
+    },
+    handleBtnUpdateEvent: function(){
+      document.getElementById('btnUpdateEvent').addEventListener('click', function(e) {
+        e.preventDefault();
+        app.updateTripName();
+        app.updatePeople();
+        app.updateDashboard();
+        app.showResultMessage('success', 'Successfully Updated');
+      });
     },
     updateResultTable: function(){
       var tbody = app.resultTable.getElementsByTagName('tbody')[0];
@@ -214,16 +234,19 @@
     btnNamesHandleEvent: function() {
       document.getElementById('btnNames').addEventListener('click', function(e) {
         e.preventDefault();
-        var inputs = document.querySelectorAll('input[name="person[]"');
-        console.log(inputs);
-        for(var i=0; i<inputs.length; i++) {
-          var value = inputs[i].value;
-          app.eventData.people.names[i] = value;
-        }
-        app.saveEventData();
+        app.updatePeople();
         app.initEventForm.innerHTML = '';
         app.updateDashboard();
       });
+    },
+    updatePeople: function(){
+      var inputs = document.querySelectorAll('input[name="person[]"');
+      for(var i=0; i<inputs.length; i++) {
+        var value = inputs[i].value.trim();
+        if (!value) continue;
+        app.eventData.people.names[i] = value;
+      }
+      app.saveEventData();
     },
     showNamesForm: function(){
       var namesForm = '';
@@ -245,9 +268,9 @@
         </div>\
         <button class="btn btn-next btn-primary" id="btnHowmanyPeople">Next</button>';
       app.initEventForm.innerHTML= howManyPeopleForm;
-      app.handleNtnHowmanyPeopleEvent();
+      app.handleBtnHowmanyPeopleEvent();
     },
-    handleNtnHowmanyPeopleEvent: function(){
+    handleBtnHowmanyPeopleEvent: function(){
       document.getElementById('btnHowmanyPeople').addEventListener('click', function(e) {
         e.preventDefault();
         var numOfPeople = document.getElementById('howmanyPeople');
@@ -268,12 +291,15 @@
     handlebtnTripNameEvent: function(){
       document.getElementById('btnTripName').addEventListener('click', function(e) {
         e.preventDefault();
-        var tripName = document.getElementById('tripName');
-        app.eventData.tripName = tripName.value;
-        app.setTripNameTitle();
-        app.saveEventData();
+        app.updateTripName();
         app.showHowManyPeopleForm();
       });
+    },
+    updateTripName: function(){
+      var tripName = document.getElementById('tripName');
+      app.eventData.tripName = tripName.value.trim();
+      app.setTripNameTitle();
+      app.saveEventData();
     },
     setTripNameTitle: function() {
       app.tripName_title.innerHTML = app.eventData.tripName;

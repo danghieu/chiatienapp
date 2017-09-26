@@ -1,4 +1,4 @@
-var version = 'v2::';
+var version = 'v2.1::';
 var cacheName = 'chiatienapp';
 var filesToCache = [
   '/',
